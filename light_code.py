@@ -62,7 +62,7 @@ def wave_mode(delay=0.05, wave_width=2):
     print("Mode: Stadium Wave")
     # Move up
     # Iterate through positions from -wave_width to NUM_FLOORS + wave_width
-    for p in [x * 0.5 for x in range(0, (NUM_FLOORS + wave_width) * 2)]:
+    for p in [x * 0.5 for x in range(0, int((NUM_FLOORS + wave_width) * 2))]:
         for i in range(NUM_FLOORS):
             # Calculate distance from pulse center p
             dist = abs(i - p)
@@ -74,7 +74,7 @@ def wave_mode(delay=0.05, wave_width=2):
         time.sleep(delay)
     
     # Move down
-    for p in [x * 0.5 for x in range((NUM_FLOORS + wave_width) * 2, -1, -1)]:
+    for p in [x * 0.5 for x in range(int((NUM_FLOORS + wave_width) * 2), -1, -1)]:
         for i in range(NUM_FLOORS):
             dist = abs(i - p)
             if dist < wave_width:
