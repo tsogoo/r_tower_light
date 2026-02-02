@@ -15,10 +15,8 @@ pca.frequency = 1000
 
 def set_brightness(channel, percent):
     """Sets brightness from 0 to 100. Inverts duty cycle as per original logic."""
-    # Ensure percent is between 0 and 100
     percent = max(0, min(100, percent))
-    # Original logic: 100% brightness -> 0 duty cycle, 0% -> 65535
-    level = int((1.0 - (percent / 100.0)) * 65535)
+    level = int(percent / 100.0 * 65535)
     pca.channels[channel].duty_cycle = level
 
 def clear_all():
@@ -83,11 +81,11 @@ def all_blink(count=5, delay=0.3):
 def main():
     try:
         while True:
-            stacking_mode()
+            stacking_mode(1)
             time.sleep(1)
-            wave_mode()
+            wave_mode(1)
             time.sleep(1)
-            all_blink()
+            all_blink(1)
             time.sleep(1)
     except KeyboardInterrupt:
         print("\nExiting...")
