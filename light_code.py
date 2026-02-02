@@ -40,52 +40,82 @@ def fade_out(channel, duration=0.5):
         set_brightness(channel, brightness)
         time.sleep(duration / steps)
 
-def stacking_mode(delay=0.3):
-    """Stacks lights from 1st floor to 9th floor."""
+def stacking_mode(delay=0.3, fade_duration=0.2):
+    """Stacks lights from 1st floor to 9th floor with fade-in."""
     print("Mode: Stacking")
     clear_all()
     for i in range(NUM_FLOORS):
-        set_brightness(i, 100)
+        fade_in(i, duration=fade_duration)
         time.sleep(delay)
     time.sleep(0.5)
-    clear_all()
-    time.sleep(0.5)
-
-def wave_mode(delay=0.1):
-    """A light wave moving up and down."""
-    print("Mode: Wave")
-    # Move up
-    for i in range(NUM_FLOORS):
-        set_brightness(i, 100)
-        if i > 0:
-            set_brightness(i-1, 0)
-        time.sleep(delay)
-    # Move down
-    for i in range(NUM_FLOORS - 1, -1, -1):
-        set_brightness(i, 100)
-        if i < NUM_FLOORS - 1:
-            set_brightness(i+1, 0)
-        time.sleep(delay)
-    set_brightness(0, 0)
-
-def all_blink(count=5, delay=0.3):
-    """Blinks all floors simultaneously."""
-    print("Mode: All Blink")
-    for _ in range(count):
+    # Fade all out slowly
+    steps = 20
+    for s in range(steps + 1):
+        brightness = 100 - (s / steps) * 100
         for i in range(NUM_FLOORS):
-            set_brightness(i, 100)
+            set_brightness(i, brightness)
+        time.sleep(0.5 / steps)
+    time.sleep(0.5)
+
+def wave_mode(delay=0.05, wave_width=2):
+    """A 'stadium wave' moving up and down."""
+    print("Mode: Stadium Wave")
+    # Move up
+    # Iterate through positions from -wave_width to NUM_FLOORS + wave_width
+    for p in [x * 0.5 for x in range(0, (NUM_FLOORS + wave_width) * 2)]:
+        for i in range(NUM_FLOORS):
+            # Calculate distance from pulse center p
+            dist = abs(i - p)
+            if dist < wave_width:
+                brightness = (1 - dist / wave_width) * 100
+            else:
+                brightness = 0
+            set_brightness(i, brightness)
         time.sleep(delay)
-        clear_all()
+    
+    # Move down
+    for p in [x * 0.5 for x in range((NUM_FLOORS + wave_width) * 2, -1, -1)]:
+        for i in range(NUM_FLOORS):
+            dist = abs(i - p)
+            if dist < wave_width:
+                brightness = (1 - dist / wave_width) * 100
+            else:
+                brightness = 0
+            set_brightness(i, brightness)
         time.sleep(delay)
+    clear_all()
+
+def all_blink(count=5, fade_in_duration=0.3, fade_out_duration=0.3, pause=0.2):
+    """Blinks all floors simultaneously with fade in and out."""
+    print("Mode: All Blink (Fade)")
+    for _ in range(count):
+        # Fade In All
+        steps = 15
+        for s in range(steps + 1):
+            brightness = (s / steps) * 100
+            for i in range(NUM_FLOORS):
+                set_brightness(i, brightness)
+            time.sleep(fade_in_duration / steps)
+        
+        time.sleep(pause)
+        
+        # Fade Out All
+        for s in range(steps + 1):
+            brightness = 100 - (s / steps) * 100
+            for i in range(NUM_FLOORS):
+                set_brightness(i, brightness)
+            time.sleep(fade_out_duration / steps)
+        
+        time.sleep(pause)
 
 def main():
     try:
         while True:
-            stacking_mode(1)
+            stacking_mode(delay=0.2, fade_duration=0.3)
             time.sleep(1)
-            wave_mode(1)
+            wave_mode(delay=0.05, wave_width=2.5)
             time.sleep(1)
-            all_blink(1)
+            all_blink(count=3, fade_in_duration=0.5, fade_out_duration=0.5)
             time.sleep(1)
     except KeyboardInterrupt:
         print("\nExiting...")
